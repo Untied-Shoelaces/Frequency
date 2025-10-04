@@ -3,16 +3,17 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(GridMovment))]
+[RequireComponent(typeof(Animator))]
 public class PlayerControler : MonoBehaviour
 {
     [SerializeField] private InputAction playerControls;
 
-    private GridMovment gridMovment;
+    private bool isMoving;
 
+    private Animator animator;
     void Start()
     {
-        gridMovment = GetComponent<GridMovment>();
+        animator = GetComponent<Animator>();
     }
 
     void OnEnable()
@@ -29,23 +30,22 @@ public class PlayerControler : MonoBehaviour
     {
         Vector2 moveDirection = playerControls.ReadValue<Vector2>();
         moveDirection = new Vector2(Mathf.Round(moveDirection.x), Mathf.Round(moveDirection.y));
-        if (gridMovment.pointsToMove.Count != 0) return;
         if (moveDirection == Vector2.zero) return;
+        if (moveDirection.y != 0 && moveDirection.x != 0) return;
+        if (animator.GetCurrentAnimatorClipInfo(0)[0].clip.name != "Idle") return;
 
-        Vector3 lastPoint;
-        if(gridMovment.pointsToMove.Count != 0) lastPoint = gridMovment.pointsToMove.Last();
-        else lastPoint = transform.position;
+        if(moveDirection.y > 0) animator.Play("MoveUp");
+        else if(moveDirection.y < 0) animator.Play("MoveDown");
+        else if(moveDirection.x > 0) animator.Play("MoveRight");
+        else if(moveDirection.x < 0) animator.Play("MoveLeft");
+    }
 
-        if (moveDirection.x != 0)
-        {
-            Vector3 newPoint = new(lastPoint.x + moveDirection.x, lastPoint.y, lastPoint.z);
-            if(gridMovment.MoveTo(newPoint)) lastPoint = newPoint;
-        }
-        if(moveDirection.y != 0)
-        {
-            Vector3 newPoint = new(lastPoint.x, lastPoint.y + moveDirection.y, lastPoint.z);
-            gridMovment.pointsToMove.Enqueue(newPoint);
-        }
+    public void CorrectPosition()
+    {
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Round(pos.x * 10f) / 10f;
+        pos.y = Mathf.Round(pos.y * 10f) / 10f;
+        transform.position = pos;
     }
 
     void FixedUpdate()
