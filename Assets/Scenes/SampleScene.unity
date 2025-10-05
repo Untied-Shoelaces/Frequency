@@ -3238,6 +3238,9 @@ MonoBehaviour:
       m_Action: Player Controls
       m_Flags: 8
     m_Flags: 0
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!212 &1948871970
 SpriteRenderer:
   m_ObjectHideFlags: 0
